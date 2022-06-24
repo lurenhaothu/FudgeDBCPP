@@ -1,0 +1,90 @@
+@startuml
+class Type{
+TypeEnum typeEnum;
+virtual int getSize();
+virtual std::string toString();
+}
+Type--|>IntType
+Type--|>StringType
+class IntType{
+class IntType()
+int getSize()
+std::string toString()
+}
+class StringType{
+int getSize()
+std::string toString()
+}
+ class TupleDesc{
+        std::vector<std::string> names;
+        std::vector<Type*> types;
+        int primaryIndex;
+        TupleDesc(vector<ColumnDefinition*>,vector<TableConstraint*>*);
+        int getSize();
+        std::vector<std::string>* getNames();
+        std::vector<Type*>* getTypes();  
+        std::string toString();
+    }
+TupleDesc*-->Type
+Table*-->TupleDesc
+TableCatalog*-->Table
+class Table{
+            std::string name;
+            TupleDesc* tupleDesc;
+            Table(std::string name, TupleDesc* tupleDesc)0
+            std::string getName()
+            TupleDesc* getTupleDesc()
+    }
+class TableCatalog{
+            std::unordered_map<std::string, Table*> tableMap;
+            TableCatalog();
+            void insertTable(std::string name, TupleDesc* tupleDesc)
+            Table* getTable(std::string name)
+    }
+class Executor{
+    executeStatement()
+}
+Executor..>TableCatalog: create or find the table
+class Tuple{
+    TupleDesc tupleDesc
+    vector<Field> fields
+}
+Executor..>Tuple: create a tuple
+Tuple..>Table: insert to Table
+Tuple*-->Field
+class Field{
+    Type* type
+    int / string data
+}
+Field--|>IntField
+Field--|>StringField
+class PageID{
+    pagenum
+    Table*
+}
+Table*-->PageID
+class Page{
+    insert()
+    tupleIterator()
+}
+class MemBuffer{
+    getPage()
+    flush()
+}
+MemBuffer*-->Page
+Table..>MemBuffer: get Page by PageID
+Page*-->Tuple
+class FudgeDB{
+    (singleton)
+    Executor
+    TableCatalog
+    DBPath: string
+    run()
+}
+FudgeDB*-->TableCatalog
+FudgeDB*-->Executor
+class tupleIterator{
+
+}
+Table*-->tupleIterator
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+tableCatalog-->table: create table, table update tablecatalogfile
+table-->page: find page, insert/delete tuple by page
+page-->membuffer: pages are managed by membuffer
+@enduml
+为每个table赋值一个tableID, 指示在table catalog文件中的位置
+然后由table负责parse和写
+我们假设每个table的列数小于100 （MYSQL最多4096列）
+并假设数据库中的表不会很多 （MYSQL受制于OS的文件系统限制，最多32767个表（linux））
+membuffer: at end of each cmd, flush (done by executor)
+membuffer should have a flush all function for test purpose

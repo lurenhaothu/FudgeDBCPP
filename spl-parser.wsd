@@ -1,0 +1,144 @@
+@startuml sql-parser
+class SQLParser{
+static bool parse(string& sql, SQLParserResult)
+}
+class SQLParserResult {
+bool isValid()
+size_t size()
+SQLStatement* getStatement(size_t)
+vector& getStatements()
+}
+class SQLStatement {
+StatementType type()
+}
+SQLStatement --|>CreateStatement
+class CreateStatement{
+CreateType type;
+char* tableName;
+vector<ColumnDefinition*>* columns;
+vector<TableConstraint*>* tableConstraints
+}
+ColumnDefinition<--*CreateStatement
+class ColumnDefinition{
+unordered_set<ConstraintType>* column_constraints
+char* name;
+ColumnType type;
+bool nullable;
+}
+TableConstraint<--*CreateStatement
+class TableConstraint{
+ConstraintType type;
+vector<char*>* columnNames;
+}
+SQLParser-->SQLParserResult
+SQLParserResult*-->SQLStatement
+InsertStatement<|--SQLStatement
+class InsertStatement{
+InsertType type;
+  char* tableName;
+  std::vector<char*>* columns;
+  std::vector<Expr*>* values;
+}
+Expr<--*InsertStatement
+class Expr{
+ExprType type;
+  Expr* expr;
+  Expr* expr2;
+  std::vector<Expr*>* exprList;
+  SelectStatement* select;
+  char* name;
+  char* table;
+  char* alias;
+  double fval;
+  int64_t ival;
+  int64_t ival2;
+  DatetimeField datetimeField;
+  ColumnType columnType;
+  bool isBoolLiteral;
+  OperatorType opType;
+  bool distinct;
+}
+SelectStatement<|--SQLStatement
+class SelectStatement{
+  TableRef* fromTable;
+  bool selectDistinct;
+  std::vector<Expr*>* selectList;
+  Expr* whereClause;
+  GroupByDescription* groupBy;
+  std::vector<SetOperation*>* setOperations;
+  std::vector<OrderDescription*>* order;
+  std::vector<WithDescription*>* withDescriptions;
+  LimitDescription* limit;
+  std::vector<LockingClause*>* lockings;
+}
+Expr<--*SelectStatement
+TableRef<--*SelectStatement
+class TableRef{
+TableRefType type;
+  char* schema;
+  char* name;
+  Alias* alias;
+  SelectStatement* select;
+  std::vector<TableRef*>* list;
+  JoinDefinition* join;
+  bool hasSchema() const;
+  const char* getName() const;
+}
+class Alias {
+  Alias(char* name, std::vector<char*>* columns = nullptr);
+  char* name;
+  std::vector<char*>* columns;
+}
+Alias<--*TableRef
+JoinDefinition<--*TableRef
+class JoinDefinition{
+TableRef* left;
+  TableRef* right;
+  Expr* condition;
+  JoinType type;
+}
+GroupByDescription<-*SelectStatement
+class GroupByDescription{
+ std::vector<Expr*>* columns;
+  Expr* having;
+}
+SetOperation <-*SelectStatement
+class SetOperation {
+  SetType setType;
+  bool isAll;
+  SelectStatement* nestedSelectStatement;
+  std::vector<OrderDescription*>* resultOrder;
+  LimitDescription* resultLimit;
+}
+OrderDescription <-*SelectStatement
+class OrderDescription {
+  OrderDescription(OrderType type, Expr* expr);
+  virtual ~OrderDescription();
+
+  OrderType type;
+  Expr* expr;
+}
+WithDescription <--*SelectStatement
+class WithDescription {
+  char* alias;
+  SelectStatement* select;
+}
+LimitDescription <--*SelectStatement
+class LimitDescription {
+  LimitDescription(Expr* limit, Expr* offset);
+
+  Expr* limit;
+  Expr* offset;
+}
+LockingClause <--*SelectStatement
+class LockingClause {
+  RowLockMode rowLockMode;
+  RowLockWaitPolicy rowLockWaitPolicy;
+  std::vector<char*>* tables;
+}
+together {
+class CreateStatement
+class InsertStatement
+class SelectStatement
+}
+@enduml

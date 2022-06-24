@@ -1,0 +1,12 @@
+@startuml
+SQLParser->SQLParserResult
+SQLParserResult->SQLStatement
+DBExecutor-->TableCatalog: create table
+SQLStatement-->DBExecutor: verify statement, execute command
+TableCatalog-->Table: if legal, create a table
+DBExecutor-->TableCatalog: find the table
+DBExecutor-->Tuple: create a new tuple
+Tuple-->Table: insert tuple
+Table-->MemBuffer: get a page
+Table-->Page: if empty insert into page
+@enduml
