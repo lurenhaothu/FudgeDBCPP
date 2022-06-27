@@ -28,6 +28,7 @@ target_link_libraries(
   ftest
   ${PROJECT_SOURCE_DIR}/lib/libsqlparser.so
   gtest_main
+  readline
 )
 
 include(GoogleTest)
