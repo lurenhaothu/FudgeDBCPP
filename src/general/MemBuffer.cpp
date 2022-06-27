@@ -5,8 +5,8 @@
 using namespace fudgeDB;
 
 MemBuffer::MemBuffer(){
-    this->head = LinkedNode();
-    this->head = LinkedNode();
+    //this->head = LinkedNode();
+    //this->head = LinkedNode();
     head.next = &tail;
     tail.prev = &head;
 }

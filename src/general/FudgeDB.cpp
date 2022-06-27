@@ -4,6 +4,9 @@
 #include "SQLParser.h"
 #include "Executor.h"
 #include "fudgeDBError.h"
+#include <readline/readline.h>
+#include <readline/history.h>
+
 
 using namespace fudgeDB;
 
@@ -24,6 +27,11 @@ FudgeDB* FudgeDB::getFudgDB(){
     return singletonFudgeDB;
 }
 FudgeDB::~FudgeDB(){
+    if(tableCatalog != nullptr) tableCatalog->updateCatalog();
+    if(memBuffer != nullptr) memBuffer->flushAll();
+    delete memBuffer;
+    delete tableCatalog;
+    delete executor;
     delete singletonFudgeDB;
 }
 TableCatalog* FudgeDB::getTableCatalog(){
@@ -40,20 +48,23 @@ void FudgeDB::open(){
 void FudgeDB::close(){
     FudgeDB::getFudgDB()->getTableCatalog()->updateCatalog();
     memBuffer->flushAll();
-    if(memBuffer != nullptr) delete memBuffer;
-    if(tableCatalog != nullptr) delete tableCatalog;
-    if(executor != nullptr) delete executor;
+    delete memBuffer;
+    delete tableCatalog;
+    delete executor;
 }
 void FudgeDB::run(){
-    std::string query;
     bool exit = false;
     while(!exit){
-        std::cout<<"FudgeDB>";
-        std::getline(std::cin, query);
+        char * line = readline("FudgeDB > ");
+        if(!line) break;
+        if(*line) add_history(line);
+        std::string query = line;
         if(query == "exit"){
             exit = true;
-            break;
-        }
+            continue;
+        }//else if(query.size() == 0){
+            //continue;
+        //}
         hsql::SQLParserResult result;
         hsql::SQLParser::parse(query, &result);
         if (result.isValid()) {
@@ -67,5 +78,6 @@ void FudgeDB::run(){
         }else{
             std::cout<<"SQL Parse error"<<std::endl;
         }
+        free(line);
     }
 }
