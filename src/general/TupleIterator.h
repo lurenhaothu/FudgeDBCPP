@@ -5,6 +5,7 @@
 
 namespace fudgeDB{
     class Tuple;
+    class TupleDesc;
 
     class TupleIterator{
         private:
@@ -30,6 +31,7 @@ namespace fudgeDB{
             virtual void open() = 0;
             virtual void close() = 0;
             virtual void rewind() = 0;
+            virtual TupleDesc* getTupleDesc() = 0;
     };
 }
 

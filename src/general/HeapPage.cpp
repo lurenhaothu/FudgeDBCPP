@@ -89,3 +89,7 @@ void HeapPage::flush(bool append){
 std::vector<Tuple*>* HeapPage::getTuples(){
     return  &tuples;
 }
+
+TupleDesc* HeapPage::getTupleDesc(){
+    return table->getTupleDesc();
+}

@@ -17,6 +17,7 @@ namespace fudgeDB{
             void open();
             void close();
             void rewind();
+            TupleDesc* getTupleDesc();
     };
 }
 

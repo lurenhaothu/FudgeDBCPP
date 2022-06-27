@@ -16,6 +16,7 @@ namespace fudgeDB{
             virtual ~Field() = default;
             virtual FieldType getType() = 0;
             virtual void toString(char*, int) = 0;
+            virtual std::string toString() = 0;
     };
     class IntField : public Field{
         private:
@@ -27,6 +28,9 @@ namespace fudgeDB{
             void toString(char* addr, int len){
                 int* ptr = (int*) addr;
                 *ptr = val;
+            }
+            std::string toString(){
+                return std::to_string(val);
             }
     };
     class StringField : public Field{
@@ -41,6 +45,9 @@ namespace fudgeDB{
                     if(i < val.size()) *(addr + i) = val[i];
                     else *(addr + i) = '\0';
                 }
+            }
+            std::string toString(){
+                return val;
             }
     };
 }

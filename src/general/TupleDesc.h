@@ -20,6 +20,8 @@ namespace fudgeDB{
             std::vector<Type*>* getTypes();
             std::string getName(int index);
             Type* getType(int index);
+
+            std::string toString();
     };
 }
 

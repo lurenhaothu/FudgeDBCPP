@@ -8,6 +8,9 @@
 #include "TableCatalog.h"
 #include "FudgeDB.h"
 #include "Tuple.h"
+#include "iostream"
+#include "Field.h"
+#include "TupleIterator.h"
 
 using namespace fudgeDB;
 
@@ -40,7 +43,13 @@ std::string Executor::executeInsertStatement(const hsql::InsertStatement* statem
     }
 }
 std::string Executor::executeSelectStatement(const hsql::SelectStatement* statement){
-    return "";
+    std::string tableName = statement->fromTable->name;
+    std::cout<<"From table name: "<<tableName<<std::endl;
+    auto table = FudgeDB::getFudgDB()->getTableCatalog()->getTable(tableName);
+    if(table == nullptr){
+        return tableName + " not found in the database";
+    }
+    return this->tupleIteratorToString(table->getIterator());
 }
 
 std::string Executor::createTableHelper(const hsql::CreateStatement* statement){
@@ -72,5 +81,53 @@ std::string Executor::createTableHelper(const hsql::CreateStatement* statement){
 }
 
 std::string Executor::insertValueHelper(const hsql::InsertStatement* statement){
-    
+    // currently only support insert the values in the order of the table tuple Desc
+    std::string tableName = statement->tableName;
+    auto tableCatalog = FudgeDB::getFudgDB()->getTableCatalog();
+    auto table = tableCatalog->getTable(tableName);
+    if(table == nullptr){
+        return "Table not exist";
+    }
+    auto tupleDesc = table->getTupleDesc();
+    if(tupleDesc->getLength() != statement->values->size()){
+        return "Cannot fit table columns, column number error";
+    }
+    for(int i = 0; i < tupleDesc->getLength(); i++){
+        auto val = statement->values->at(i);
+        switch(val->type){
+            case hsql::ExprType::kExprLiteralInt:
+                if(tupleDesc->getType(i)->getType() != TypeEnum::IntTypeEnum) return "Cannot fit table columns, type error";
+                break;
+            case hsql::ExprType::kExprLiteralString:
+                if(tupleDesc->getType(i)->getType() != TypeEnum::StringTypeEnum) return "Cannot fit table columns, type error";
+                break;
+            default:
+                return "Unsupported data type";
+        }
+    }
+    std::vector<Field*> fields;
+    for(int i = 0; i < tupleDesc->getLength(); i++){
+        auto val = statement->values->at(i);
+        switch(val->type){
+            case hsql::ExprType::kExprLiteralInt:
+                fields.push_back(new IntField(val->ival));
+                break;
+            case hsql::ExprType::kExprLiteralString:
+                fields.push_back(new StringField(val->name));
+                break;
+        }
+    }
+    auto tuple = new Tuple(tupleDesc, fields);
+    table->insertTuple(tuple);
+    return "Insert successfully";
+}
+
+std::string Executor::tupleIteratorToString(TupleIterator* tupleIterator){
+    std::string res = tupleIterator->getTupleDesc()->toString() + '\n';
+    tupleIterator->open();
+    while(tupleIterator->hasNext()){
+        res += tupleIterator->next()->toString() + '\n';
+    }
+    tupleIterator->close();
+    return res;
 }

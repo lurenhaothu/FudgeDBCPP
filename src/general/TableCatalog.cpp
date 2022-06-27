@@ -22,7 +22,9 @@ TableCatalog::TableCatalog(std::string CatalogFile){
         }
         file.close();
     }else{
-        throw fudgeError("File IO error");
+        //throw fudgeError("File IO error");
+        // no nothing
+        //new DB, no previous table catalog exists
     }
 }
 TableCatalog::~TableCatalog(){
@@ -38,6 +40,7 @@ void TableCatalog::insertTable(std::string name, Table* table){
         this->updateCatalog();
     }
 }
+
 Table* TableCatalog::getTable(std::string name){
     if(tableMap.find(name) == tableMap.end()){
         return nullptr;

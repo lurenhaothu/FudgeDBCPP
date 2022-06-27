@@ -11,6 +11,8 @@ namespace hsql{
 }
 
 namespace fudgeDB{
+    class TupleIterator;
+
     class Executor{
         public:
             Executor() = default;
@@ -22,6 +24,7 @@ namespace fudgeDB{
         private:
             std::string createTableHelper(const hsql::CreateStatement* statement);
             std::string insertValueHelper(const hsql::InsertStatement* statement);
+            std::string tupleIteratorToString(TupleIterator*);
     };
 }
 

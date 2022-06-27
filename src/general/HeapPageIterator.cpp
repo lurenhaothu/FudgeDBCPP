@@ -1,6 +1,8 @@
 #include "HeapPageIterator.h"
 #include "HeapPage.h"
 #include "Tuple.h"
+#include "FudgeDB.h"
+#include "MemBuffer.h"
 
 using namespace fudgeDB;
 
@@ -33,4 +35,10 @@ void HeapPageIterator::rewind(){
 }
 HeapPageIterator::~HeapPageIterator(){
     //TODO: release page for MemBuffer
+    // no need to do this anymore
+    // page release done by table iterator
+}
+
+TupleDesc* HeapPageIterator::getTupleDesc(){
+    return page->getTupleDesc();
 }

@@ -7,6 +7,7 @@ namespace fudgeDB{
     class Table;
     class HeapPage;
     class HeapPageIterator;
+    class TupleDesc;
 
     class TableIterator : public TupleIterator{
         private:
@@ -21,6 +22,7 @@ namespace fudgeDB{
             void open();
             void close();
             void rewind();
+            TupleDesc* getTupleDesc();
     };
 }
 

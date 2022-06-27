@@ -15,6 +15,7 @@ namespace fudgeDB{
             TableCatalog(std::string CatalogFile); //load from file
             ~TableCatalog();
             void insertTable(std::string name, Table* table);
+            // Return nullptr if table name not exist
             Table* getTable(std::string name);
         public:
             void updateCatalog();

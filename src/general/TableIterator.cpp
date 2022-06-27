@@ -81,3 +81,7 @@ void TableIterator::rewind(){
     page = nullptr;
     pageIterator = nullptr;
 }
+
+TupleDesc* TableIterator::getTupleDesc(){
+    return table->getTupleDesc();
+}

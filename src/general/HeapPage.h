@@ -7,6 +7,7 @@ namespace fudgeDB{
     class Tuple;
     class Table;
     class TupleIterator;
+    class TupleDesc;
 
     class HeapPage{
         private:
@@ -22,6 +23,8 @@ namespace fudgeDB{
             void flush(bool);
 
             std::vector<Tuple*>* getTuples();
+
+            TupleDesc* getTupleDesc();
     };
 }
 

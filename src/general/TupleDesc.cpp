@@ -38,3 +38,20 @@ std::string TupleDesc::getName(int index){
 Type* TupleDesc::getType(int index){
     return types[index];
 }
+std::string TupleDesc::toString(){
+    std::string res;
+    for(int i = 0; i < names.size(); i++){
+        res += names[i];
+        switch(types[i]->getType()){
+            case TypeEnum::IntTypeEnum:
+                res += "(INT)";
+                break;
+            case TypeEnum::StringTypeEnum:
+                res += "(STR " + std::to_string(types[i]->getSize()) + ")";
+        }
+        if(i != names.size() - 1){
+            res += " | ";
+        }
+    }
+    return res;
+}

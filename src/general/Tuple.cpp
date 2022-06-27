@@ -2,6 +2,7 @@
 #include "Field.h"
 #include "TupleDesc.h"
 #include "Type.h"
+#include <string>
 
 using namespace fudgeDB;
 
@@ -81,4 +82,13 @@ Tuple* Tuple::parseTuple(TupleDesc* tupleDesc, char* tupleContent){
         return new Tuple(tupleDesc, nextAvail);
     }
     
+}
+
+std::string Tuple::toString(){
+    std::string res;
+    for(int i = 0; i < fields.size(); i++){
+        res += fields[i]->toString();
+        if(i != fields.size() - 1) res += " | ";
+    }
+    return res;
 }

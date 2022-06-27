@@ -24,9 +24,12 @@ namespace fudgeDB{
             int getNextAvail();
             ~Tuple();
             
-            //std::string toString();
+            //toString for file io
             void toString(char*);
             static Tuple* parseTuple(TupleDesc* tupleDesc, char* tupleContent);
+
+            //toString for CLI output
+            std::string toString();
     };
 }
 
