@@ -8,15 +8,26 @@ namespace fudgeDB{
         intField,
         stringField
     };
+    enum Op{
+        equals,
+        less,
+        greater,
+        times,
+        divide,
+        plus,
+        minus
+    };
     class Field{
         private:
             FieldType type;
         public:
             Field() = default;
             virtual ~Field() = default;
-            virtual FieldType getType() = 0;
-            virtual void toString(char*, int) = 0;
-            virtual std::string toString() = 0;
+            virtual FieldType getType();
+            virtual void toString(char*, int);
+            virtual std::string toString();
+            static bool filter(Field* field1, Field* field2, Op op); //TODO
+            static Field calculate(Field* field1, Field* field2, Op op); //TODO
     };
     class IntField : public Field{
         private:

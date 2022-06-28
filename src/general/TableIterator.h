@@ -15,8 +15,10 @@ namespace fudgeDB{
             int pageID;
             HeapPage* page;
             TupleIterator* pageIterator;
+            TupleDesc* tupleDesc;
         public:
-            TableIterator(Table* table);
+            TableIterator(Table* table); //TODO
+            TableIterator(Table* table, std::string alias); //TODO
             ~TableIterator();
             Tuple* fetchNext();
             void open();

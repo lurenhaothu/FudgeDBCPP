@@ -43,13 +43,31 @@ std::string Executor::executeInsertStatement(const hsql::InsertStatement* statem
     }
 }
 std::string Executor::executeSelectStatement(const hsql::SelectStatement* statement){
-    std::string tableName = statement->fromTable->name;
-    std::cout<<"From table name: "<<tableName<<std::endl;
-    auto table = FudgeDB::getFudgDB()->getTableCatalog()->getTable(tableName);
-    if(table == nullptr){
-        return tableName + " not found in the database";
+    //std::string tableName = statement->fromTable->name;
+    //std::cout<<"From table name: "<<tableName<<std::endl;
+    //auto table = FudgeDB::getFudgDB()->getTableCatalog()->getTable(tableName);
+    //if(table == nullptr){
+    //    return tableName + " not found in the database";
+    //}
+    if(statement->fromTable != nullptr) std::cout<<statement->fromTable->type<<std::endl;
+    if(statement->fromTable->join != nullptr) std::cout<<statement->fromTable->join->type<<std::endl;
+    if(statement->fromTable->list != nullptr)std::cout<<statement->fromTable->list->size()<<std::endl;
+    if(statement->fromTable->alias != nullptr)std::cout<<statement->fromTable->alias->name<<std::endl;
+    //where clause
+    /*for(auto selectItem : *statement->selectList){
+        std::cout<<selectItem->type<<std::endl;
+        std::cout<<selectItem->opType<<std::endl;
     }
-    return this->tupleIteratorToString(table->getIterator());
+    if(statement->whereClause != nullptr){
+        auto where = statement->whereClause;
+        std::cout<<where->type<<std::endl;
+        std::cout<<where->opType<<std::endl;
+        if(where->exprList != nullptr) std::cout<<where->exprList->size()<<std::endl;
+        if(where->expr != nullptr) std::cout<<where->expr->type<<' '<<where->expr->opType<<std::endl;
+        if(where->expr2 != nullptr) std::cout<<where->expr2->type<<' '<<where->expr2->opType<<std::endl;
+    }
+    return this->tupleIteratorToString(table->getIterator());*/
+    return "";
 }
 
 std::string Executor::createTableHelper(const hsql::CreateStatement* statement){
