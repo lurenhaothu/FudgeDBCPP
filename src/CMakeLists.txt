@@ -7,3 +7,6 @@ target_include_directories(fudgeDBLib PUBLIC ${PROJECT_SOURCE_DIR}/inc/sqlsrc PU
 target_link_libraries(fudgeDBLib ${PROJECT_SOURCE_DIR}/lib/libsqlparser.so readline)
 target_include_directories(main PUBLIC ${PROJECT_SOURCE_DIR}/inc/sqlsrc PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(main ${PROJECT_SOURCE_DIR}/lib/libsqlparser.so readline)
+
+#add_subdirectory(general)
+#add_subdirectory(execution)

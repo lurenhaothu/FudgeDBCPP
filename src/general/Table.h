@@ -22,6 +22,7 @@ namespace fudgeDB{
             void insertTuple(Tuple* tuple);
             void addPage();
             TupleIterator* getIterator();
+            TupleIterator* getIterator(std::string alias);
 
             static Table* parseTable(std::string str);
             std::string toString();

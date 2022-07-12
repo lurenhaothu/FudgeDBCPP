@@ -19,15 +19,15 @@ namespace fudgeDB{
     };
     class Field{
         private:
-            FieldType type;
+            //FieldType type;
         public:
             Field() = default;
             virtual ~Field() = default;
-            virtual FieldType getType();
-            virtual void toString(char*, int);
-            virtual std::string toString();
+            virtual FieldType getType() = 0;
+            virtual void toString(char*, int) = 0;
+            virtual std::string toString() = 0;
             static bool filter(Field* field1, Field* field2, Op op); //TODO
-            static Field calculate(Field* field1, Field* field2, Op op); //TODO
+            static Field* calculate(Field* field1, Field* field2, Op op); //TODO
     };
     class IntField : public Field{
         private:

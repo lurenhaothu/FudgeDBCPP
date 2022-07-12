@@ -13,16 +13,19 @@ namespace fudgeDB{
             Type(int size){this->size = size;}
             int getSize(){return size;}
             virtual TypeEnum getType() = 0;
+            virtual Type* makeCopy() = 0;
     };
     class IntType : public Type{
         public:
             IntType():Type(sizeof(int)){}
             TypeEnum getType(){return TypeEnum::IntTypeEnum;}
+            Type* makeCopy(){return new IntType();}
     };
     class StringType : public Type{
         public:
             StringType(int length):Type(length){}
             TypeEnum getType(){return TypeEnum::StringTypeEnum;}
+            Type* makeCopy(){return new StringType(this->getSize());}
     };
 }
 

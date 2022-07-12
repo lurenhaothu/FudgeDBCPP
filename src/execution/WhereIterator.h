@@ -1,6 +1,7 @@
 #ifndef FUDGEDB_SRC_EXECUTION_WHEREITERATOR_H
 #define FUDGEDB_SRC_EXECUTION_WHEREITERATOR_H
 
+#include "general/Field.h"
 #include "general/TupleIterator.h"
 #include "SQLParser.h"
 

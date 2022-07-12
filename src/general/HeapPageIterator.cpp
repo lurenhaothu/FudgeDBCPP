@@ -34,7 +34,7 @@ void HeapPageIterator::rewind(){
     index = 0;
 }
 HeapPageIterator::~HeapPageIterator(){
-    //TODO: release page for MemBuffer
+    //release page for MemBuffer
     // no need to do this anymore
     // page release done by table iterator
 }

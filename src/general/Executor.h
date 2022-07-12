@@ -24,7 +24,10 @@ namespace fudgeDB{
         private:
             std::string createTableHelper(const hsql::CreateStatement* statement);
             std::string insertValueHelper(const hsql::InsertStatement* statement);
+
+            TupleIterator* executeSelectToIterator(const hsql::SelectStatement* statement);
             std::string tupleIteratorToString(TupleIterator*);
+
     };
 }
 

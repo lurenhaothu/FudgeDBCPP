@@ -1,6 +1,7 @@
 #include "WhereIterator.h"
-#include "general/Field.h"
 #include "general/TupleDesc.h"
+#include "general/Tuple.h"
+#include "iostream"
 
 using namespace fudgeDB;
 
@@ -8,6 +9,7 @@ WhereIterator::WhereIterator(hsql::Expr *whereClause, TupleIterator* tupleIterat
     this->whereClause = whereClause;
     this->tupleIterator = tupleIterator;
 }
+
 Tuple* WhereIterator::fetchNext(){
     while(tupleIterator->hasNext()){
         auto tuple = tupleIterator->next();
@@ -58,7 +60,6 @@ bool WhereIterator::filter(Tuple* tuple, hsql::Expr* expr){
 }
 
 bool WhereIterator::binaryFilter(Tuple* tuple, hsql::Expr* expr, Op op){
-    // don't support column calculation now
     Field* field1 = getField(tuple, expr->expr);
     Field* field2 = getField(tuple, expr->expr2);
     return Field::filter(field1, field2, op);
@@ -80,9 +81,17 @@ Field* WhereIterator::getField(Tuple* tuple, hsql::Expr* expr){
 }
 
 Field* WhereIterator::getFieldByColumnRef(Tuple* tuple, hsql::Expr* expr){
-    //TODO
+    std::string alias = expr->table == nullptr ? "" : expr->table;
+    std::string colName = expr->name == nullptr ? "" : expr->name;
+    //std::cout<<alias<<", "<<colName<<std::endl;
+    int index = this->getTupleDesc()->getIndex(alias, colName);
+    if(index == -1){
+        throw fudgeError("column name not matched");
+    }
+    return tuple->getField(index);
 }
 
 Field* WhereIterator::getFieldByCalculation(Tuple* tuple, hsql::Expr* expr){
     //TODO
+    return nullptr;
 }

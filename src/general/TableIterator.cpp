@@ -5,6 +5,8 @@
 #include "HeapPage.h"
 #include "HeapPageIterator.h"
 #include "TupleIterator.h"
+#include "Table.h"
+#include "TupleDesc.h"
 
 using namespace fudgeDB;
 
@@ -13,11 +15,20 @@ TableIterator::TableIterator(Table* table){
     pageID = -1;
     page = nullptr;
     pageIterator = nullptr;
+    this->tupleDesc = new TupleDesc(table->getTupleDesc(), table->getName(), "");
+}
+TableIterator::TableIterator(Table* table, std::string alias){
+    this->table = table;
+    pageID = -1;
+    page = nullptr;
+    pageIterator = nullptr;
+    this->tupleDesc = new TupleDesc(table->getTupleDesc(), table->getName(), alias);
 }
 TableIterator::~TableIterator(){
     if(page != nullptr)FudgeDB::getFudgDB()->getMemBuffer()->releasePage(table, pageID);
     pageID = -1;
     page = nullptr;
+    delete tupleDesc;
     delete pageIterator;
 }
 Tuple* TableIterator::fetchNext(){
@@ -83,5 +94,5 @@ void TableIterator::rewind(){
 }
 
 TupleDesc* TableIterator::getTupleDesc(){
-    return table->getTupleDesc();
+    return this->tupleDesc;
 }

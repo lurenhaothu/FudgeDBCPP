@@ -115,3 +115,7 @@ int Table::getPageNum(){
 TupleIterator* Table::getIterator(){
     return new TableIterator(this);
 }
+
+TupleIterator* Table::getIterator(std::string alias){
+    return new TableIterator(this, alias);
+}

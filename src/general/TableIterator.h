@@ -17,8 +17,8 @@ namespace fudgeDB{
             TupleIterator* pageIterator;
             TupleDesc* tupleDesc;
         public:
-            TableIterator(Table* table); //TODO
-            TableIterator(Table* table, std::string alias); //TODO
+            TableIterator(Table* table);
+            TableIterator(Table* table, std::string alias);
             ~TableIterator();
             Tuple* fetchNext();
             void open();

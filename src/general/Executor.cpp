@@ -1,4 +1,6 @@
+//#include "Field.h"
 #include "Executor.h"
+
 #include "SQLParser.h"
 #include <vector>
 #include "Type.h"
@@ -9,8 +11,9 @@
 #include "FudgeDB.h"
 #include "Tuple.h"
 #include "iostream"
-#include "Field.h"
+
 #include "TupleIterator.h"
+#include "execution/WhereIterator.h"
 
 using namespace fudgeDB;
 
@@ -43,31 +46,8 @@ std::string Executor::executeInsertStatement(const hsql::InsertStatement* statem
     }
 }
 std::string Executor::executeSelectStatement(const hsql::SelectStatement* statement){
-    //std::string tableName = statement->fromTable->name;
-    //std::cout<<"From table name: "<<tableName<<std::endl;
-    //auto table = FudgeDB::getFudgDB()->getTableCatalog()->getTable(tableName);
-    //if(table == nullptr){
-    //    return tableName + " not found in the database";
-    //}
-    if(statement->fromTable != nullptr) std::cout<<statement->fromTable->type<<std::endl;
-    if(statement->fromTable->join != nullptr) std::cout<<statement->fromTable->join->type<<std::endl;
-    if(statement->fromTable->list != nullptr)std::cout<<statement->fromTable->list->size()<<std::endl;
-    if(statement->fromTable->alias != nullptr)std::cout<<statement->fromTable->alias->name<<std::endl;
-    //where clause
-    /*for(auto selectItem : *statement->selectList){
-        std::cout<<selectItem->type<<std::endl;
-        std::cout<<selectItem->opType<<std::endl;
-    }
-    if(statement->whereClause != nullptr){
-        auto where = statement->whereClause;
-        std::cout<<where->type<<std::endl;
-        std::cout<<where->opType<<std::endl;
-        if(where->exprList != nullptr) std::cout<<where->exprList->size()<<std::endl;
-        if(where->expr != nullptr) std::cout<<where->expr->type<<' '<<where->expr->opType<<std::endl;
-        if(where->expr2 != nullptr) std::cout<<where->expr2->type<<' '<<where->expr2->opType<<std::endl;
-    }
-    return this->tupleIteratorToString(table->getIterator());*/
-    return "";
+    auto tupleIterator = this->executeSelectToIterator(statement);
+    return this->tupleIteratorToString(tupleIterator);
 }
 
 std::string Executor::createTableHelper(const hsql::CreateStatement* statement){
@@ -148,4 +128,35 @@ std::string Executor::tupleIteratorToString(TupleIterator* tupleIterator){
     }
     tupleIterator->close();
     return res;
+}
+
+TupleIterator* Executor::executeSelectToIterator(const hsql::SelectStatement* statement){
+    auto tableRef = statement->fromTable;
+    TupleIterator* fromIterator = nullptr;
+    switch(tableRef->type){
+        case hsql::TableRefType::kTableName:
+            if(tableRef->alias == nullptr){
+                fromIterator = FudgeDB::getFudgDB()->getTableCatalog()->
+                    getTable(tableRef->name)->getIterator();
+            }else{
+                //std::cout<<tableRef->alias->name<<std::endl;
+                fromIterator = FudgeDB::getFudgDB()->getTableCatalog()->
+                    getTable(tableRef->name)->getIterator(tableRef->alias->name);
+            }
+            break;
+        case hsql::TableRefType::kTableCrossProduct:
+        case hsql::TableRefType::kTableJoin:
+            //TODO
+            break;
+        case hsql::TableRefType::kTableSelect:
+            //TODO
+            break;
+        default:
+            throw fudgeError("Unsupported select from table");
+    }
+    auto whereClause = statement->whereClause;
+    TupleIterator* afterWhere = fromIterator;
+    if(whereClause != nullptr) afterWhere = new WhereIterator(whereClause, fromIterator);
+    return afterWhere;
+    //TODO
 }
