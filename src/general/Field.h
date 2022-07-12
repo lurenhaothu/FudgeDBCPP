@@ -26,14 +26,17 @@ namespace fudgeDB{
             virtual FieldType getType() = 0;
             virtual void toString(char*, int) = 0;
             virtual std::string toString() = 0;
-            static bool filter(Field* field1, Field* field2, Op op); //TODO
-            static Field* calculate(Field* field1, Field* field2, Op op); //TODO
+            static bool filter(Field* field1, Field* field2, Op op);
+            static Field* calculate(Field* field1, Field* field2, Op op);
+            static Field* copy(Field* field);
+            //static Field* copy(Field* field);
     };
     class IntField : public Field{
         private:
             int val;
         public:
             IntField(int val){this->val = val;}
+            IntField(const IntField& intField){this->val = intField.val;}
             int getValue(){return val;}
             FieldType getType(){return FieldType::intField;};
             void toString(char* addr, int len){
@@ -49,6 +52,7 @@ namespace fudgeDB{
             std::string val;
         public:
             StringField(std::string val){this->val = val;}
+            StringField(const StringField& stringField){this->val = stringField.val;}
             std::string getValue(){return val;}
             FieldType getType(){return FieldType::stringField;};
             void toString(char* addr, int len){

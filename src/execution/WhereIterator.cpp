@@ -62,7 +62,10 @@ bool WhereIterator::filter(Tuple* tuple, hsql::Expr* expr){
 bool WhereIterator::binaryFilter(Tuple* tuple, hsql::Expr* expr, Op op){
     Field* field1 = getField(tuple, expr->expr);
     Field* field2 = getField(tuple, expr->expr2);
-    return Field::filter(field1, field2, op);
+    bool res = Field::filter(field1, field2, op);
+    delete field1;
+    delete field2;
+    return res;
 }
 
 Field* WhereIterator::getField(Tuple* tuple, hsql::Expr* expr){
@@ -88,10 +91,30 @@ Field* WhereIterator::getFieldByColumnRef(Tuple* tuple, hsql::Expr* expr){
     if(index == -1){
         throw fudgeError("column name not matched");
     }
-    return tuple->getField(index);
+    return Field::copy(tuple->getField(index));
 }
 
 Field* WhereIterator::getFieldByCalculation(Tuple* tuple, hsql::Expr* expr){
-    //TODO
-    return nullptr;
+    Field* field1 = getField(tuple, expr->expr);
+    Field* field2 = getField(tuple, expr->expr2);
+    Field* res;
+    switch(expr->opType){
+        case hsql::OperatorType::kOpPlus:
+            res = Field::calculate(field1, field2, Op::plus);
+            break;
+        case hsql::OperatorType::kOpMinus:
+            res = Field::calculate(field1, field2, Op::minus);
+            break;
+        case hsql::OperatorType::kOpAsterisk:
+            res = Field::calculate(field1, field2, Op::times);
+            break;
+        case hsql::OperatorType::kOpSlash:
+            res = Field::calculate(field1, field2, Op::divide);
+            break;
+        default:
+            throw fudgeError("unsupported calculation operator");
+    }
+    delete field1;
+    delete field2;
+    return res;
 }
