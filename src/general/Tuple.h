@@ -19,6 +19,9 @@ namespace fudgeDB{
         public:
             Tuple(TupleDesc* tupleDesc, std::vector<Field*> fields);
             Tuple(TupleDesc* tupleDesc, int nextAvail); //make an empty tuple
+            Tuple(Tuple* tuple1, Tuple* tuple2, TupleDesc* tupleDesc); //merge two tuples together
+            Tuple(Tuple* tuple, TupleDesc* tupleDesc); //get a copy with different tupleDesc
+            TupleDesc* getTupleDesc();
             std::vector<Field*>* getFields();
             Field* getField(int index);
             int getNextAvail();

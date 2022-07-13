@@ -30,9 +30,7 @@ int Tuple::getNextAvail(){
 
 Tuple::~Tuple(){
     for(auto field : fields){
-        if(field != nullptr){
-            delete field;
-        }
+        delete field;
     }
 }
 
@@ -91,4 +89,25 @@ std::string Tuple::toString(){
         if(i != fields.size() - 1) res += " | ";
     }
     return res;
+}
+
+Tuple::Tuple(Tuple* tuple1, Tuple* tuple2, TupleDesc* tupleDesc){
+    for(auto field : *tuple1->getFields()){
+        this->fields.push_back(Field::copy(field));
+    }
+    for(auto field : *tuple2->getFields()){
+        this->fields.push_back(Field::copy(field));
+    }
+    this->tupleDesc = tupleDesc;
+    this->nextAvail = this->PRESENT;
+}
+Tuple::Tuple(Tuple* tuple, TupleDesc* tupleDesc){
+    for(auto field : *tuple->getFields()){
+        this->fields.push_back(Field::copy(field));
+    }
+    this->tupleDesc = tupleDesc;
+    this->nextAvail = this->PRESENT;
+}
+TupleDesc* Tuple::getTupleDesc(){
+    return this->tupleDesc;
 }

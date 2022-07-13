@@ -7,6 +7,7 @@
 #include "TupleIterator.h"
 #include "Table.h"
 #include "TupleDesc.h"
+#include "Tuple.h"
 
 using namespace fudgeDB;
 
@@ -45,13 +46,13 @@ Tuple* TableIterator::fetchNext(){
                 page = nullptr;
                 pageID++;
             }else{
-                return pageIterator->next();
+                return new Tuple(pageIterator->next(), this->tupleDesc);
             }
         }
         return nullptr;
     }else{
         if(pageIterator->hasNext()){
-            return pageIterator->next();
+            return new Tuple(pageIterator->next(), this->tupleDesc);
         }else{
             FudgeDB::getFudgDB()->getMemBuffer()->releasePage(table, pageID);
             delete pageIterator;
@@ -68,7 +69,7 @@ Tuple* TableIterator::fetchNext(){
                     page = nullptr;
                     pageID++;
                 }else{
-                    return pageIterator->next();
+                    return new Tuple(pageIterator->next(), this->tupleDesc);
                 }
             }
             return nullptr;

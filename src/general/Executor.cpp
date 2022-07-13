@@ -1,6 +1,4 @@
-//#include "Field.h"
 #include "Executor.h"
-
 #include "SQLParser.h"
 #include <vector>
 #include "Type.h"
@@ -14,6 +12,7 @@
 
 #include "TupleIterator.h"
 #include "execution/WhereIterator.h"
+#include "execution/JoinIterator.h"
 
 using namespace fudgeDB;
 
@@ -124,29 +123,55 @@ std::string Executor::tupleIteratorToString(TupleIterator* tupleIterator){
     std::string res = tupleIterator->getTupleDesc()->toString() + '\n';
     tupleIterator->open();
     while(tupleIterator->hasNext()){
-        res += tupleIterator->next()->toString() + '\n';
+        auto tuple = tupleIterator->next();
+        res += tuple->toString() + '\n';
+        delete tuple;
     }
     tupleIterator->close();
     return res;
 }
 
 TupleIterator* Executor::executeSelectToIterator(const hsql::SelectStatement* statement){
-    auto tableRef = statement->fromTable;
+    TupleIterator* fromIterator = executeFromTableRef(statement->fromTable);
+    auto whereClause = statement->whereClause;
+    TupleIterator* afterWhere = fromIterator;
+    if(whereClause != nullptr) afterWhere = new WhereIterator(whereClause, fromIterator);
+    return afterWhere;
+    //TODO
+}
+
+TupleIterator* Executor::executeFromTableRef(const hsql::TableRef* tableRef){
+    Table* table;
     TupleIterator* fromIterator = nullptr;
+    TupleIterator* left;
+    TupleIterator* right;
+    std::vector<TupleIterator*> tupleIterators;
     switch(tableRef->type){
         case hsql::TableRefType::kTableName:
             if(tableRef->alias == nullptr){
+                table = FudgeDB::getFudgDB()->getTableCatalog()->
+                    getTable(tableRef->name);
+                if(table == nullptr) throw fudgeError("table not found");
                 fromIterator = FudgeDB::getFudgDB()->getTableCatalog()->
                     getTable(tableRef->name)->getIterator();
             }else{
-                //std::cout<<tableRef->alias->name<<std::endl;
+                table = FudgeDB::getFudgDB()->getTableCatalog()->
+                    getTable(tableRef->name);
+                if(table == nullptr) throw fudgeError("table not found");
                 fromIterator = FudgeDB::getFudgDB()->getTableCatalog()->
                     getTable(tableRef->name)->getIterator(tableRef->alias->name);
             }
             break;
         case hsql::TableRefType::kTableCrossProduct:
+            for(auto table : *(tableRef->list)){
+                tupleIterators.push_back(executeFromTableRef(table));
+            }
+            fromIterator = new JoinIterator(&tupleIterators);
+            break;
         case hsql::TableRefType::kTableJoin:
-            //TODO
+            left = executeFromTableRef(tableRef->join->left);
+            right = executeFromTableRef(tableRef->join->right);
+            fromIterator = new JoinIterator(left, right, tableRef->join->condition);
             break;
         case hsql::TableRefType::kTableSelect:
             //TODO
@@ -154,9 +179,5 @@ TupleIterator* Executor::executeSelectToIterator(const hsql::SelectStatement* st
         default:
             throw fudgeError("Unsupported select from table");
     }
-    auto whereClause = statement->whereClause;
-    TupleIterator* afterWhere = fromIterator;
-    if(whereClause != nullptr) afterWhere = new WhereIterator(whereClause, fromIterator);
-    return afterWhere;
-    //TODO
+    return fromIterator;
 }

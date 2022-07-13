@@ -8,6 +8,7 @@ namespace hsql{
     class CreateStatement;
     class InsertStatement;
     class SelectStatement;
+    class TableRef;
 }
 
 namespace fudgeDB{
@@ -27,6 +28,8 @@ namespace fudgeDB{
 
             TupleIterator* executeSelectToIterator(const hsql::SelectStatement* statement);
             std::string tupleIteratorToString(TupleIterator*);
+
+            TupleIterator* executeFromTableRef(const hsql::TableRef* tableRef);
 
     };
 }

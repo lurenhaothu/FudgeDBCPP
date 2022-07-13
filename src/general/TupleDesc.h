@@ -17,11 +17,14 @@ namespace fudgeDB{
             TupleDesc(std::vector<std::string> names, std::vector<Type*> types);
             TupleDesc(std::vector<std::string> names, std::vector<Type*> types, std::vector<std::string> tableNames, std::vector<std::string> alias);
             TupleDesc(TupleDesc* tupleDesc, std::string tableNames, std::string alias);
+            TupleDesc(TupleDesc* tupleDesc1, TupleDesc* tupleDesc2);
             ~TupleDesc();
             int getSize(); //byte size of the tuple
             int getLength(); //col number
             std::vector<std::string>* getNames();
             std::vector<Type*>* getTypes();
+            std::string getTableName(int index);
+            std::string getAlias(int index);
             std::string getName(int index);
             Type* getType(int index);
 

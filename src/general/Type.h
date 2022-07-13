@@ -1,6 +1,8 @@
 #ifndef FUDGEDB_SRC_GENERAL_TYPE_H
 #define FUDGEDB_SRC_GENERAL_TYPE_H
 
+#include "fudgeDBError.h"
+
 namespace fudgeDB{
     enum TypeEnum{
         IntTypeEnum,
@@ -14,6 +16,7 @@ namespace fudgeDB{
             int getSize(){return size;}
             virtual TypeEnum getType() = 0;
             virtual Type* makeCopy() = 0;
+            static Type* copy(Type* type);
     };
     class IntType : public Type{
         public:

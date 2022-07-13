@@ -12,18 +12,12 @@ namespace fudgeDB{
             TupleIterator* tupleIterator;
         public:
             WhereIterator(hsql::Expr *whereClause, TupleIterator* tupleIterator);
-            ~WhereIterator() = default;
+            ~WhereIterator();
             Tuple* fetchNext();
             void open();
             void close();
             void rewind();
             TupleDesc* getTupleDesc();
-        private:
-            bool filter(Tuple* tuple, hsql::Expr* expr);
-            bool binaryFilter(Tuple* tuple, hsql::Expr* expr, Op op);
-            Field* getField(Tuple* tuple, hsql::Expr* expr);
-            Field* getFieldByColumnRef(Tuple* tuple, hsql::Expr* expr);
-            Field* getFieldByCalculation(Tuple* tuple, hsql::Expr* expr);
     };
 }
 

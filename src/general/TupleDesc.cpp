@@ -94,3 +94,36 @@ int TupleDesc::getIndex(std::string table, std::string colName){
     }
     return -1;
 }
+
+TupleDesc::TupleDesc(TupleDesc* tupleDesc1, TupleDesc* tupleDesc2){
+    int l1 = tupleDesc1->getLength();
+    int l2 = tupleDesc2->getLength();
+    for(int i = 0; i < l1; i++){
+        types.push_back(Type::copy(tupleDesc1->getType(i)));
+        names.push_back(tupleDesc1->getName(i));
+        tableNames.push_back(tupleDesc1->getTableName(i));
+        alias.push_back(tupleDesc1->getAlias(i));
+    }
+    for(int i = 0; i < l2; i++){
+        types.push_back(Type::copy(tupleDesc2->getType(i)));
+        names.push_back(tupleDesc2->getName(i));
+        tableNames.push_back(tupleDesc2->getTableName(i));
+        alias.push_back(tupleDesc2->getAlias(i));
+    }
+    size = tupleDesc1->getSize() + tupleDesc2->getSize();
+}
+
+std::string TupleDesc::getTableName(int index){
+    if(index < this->tableNames.size()){
+        return tableNames[index];
+    }else{
+        return "";
+    }
+}
+std::string TupleDesc::getAlias(int index){
+    if(index < this->alias.size()){
+        return alias[index];
+    }else{
+        return "";
+    }
+}
