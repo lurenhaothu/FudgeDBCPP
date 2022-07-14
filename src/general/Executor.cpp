@@ -13,6 +13,8 @@
 #include "TupleIterator.h"
 #include "execution/WhereIterator.h"
 #include "execution/JoinIterator.h"
+#include "execution/AggregationIterator.h"
+#include "execution/ExecutionUtility.h"
 
 using namespace fudgeDB;
 
@@ -132,11 +134,46 @@ std::string Executor::tupleIteratorToString(TupleIterator* tupleIterator){
 }
 
 TupleIterator* Executor::executeSelectToIterator(const hsql::SelectStatement* statement){
+    //execution order
+    //FROM & JOINs determine & filter rows
+    //WHERE more filters on the rows
+    //GROUP BY combines those rows into groups
+    //HAVING filters groups
+    //ORDER BY arranges the remaining rows/groups
+    //LIMIT filters on the remaining rows/groups
+    auto colAliasMap = ExecutionUtility::getColAliasMap(statement->selectList);
+
     TupleIterator* fromIterator = executeFromTableRef(statement->fromTable);
     auto whereClause = statement->whereClause;
-    TupleIterator* afterWhere = fromIterator;
-    if(whereClause != nullptr) afterWhere = new WhereIterator(whereClause, fromIterator);
-    return afterWhere;
+    TupleIterator* whereIterator = fromIterator;
+    if(whereClause != nullptr) whereIterator = new WhereIterator(whereClause, fromIterator);
+
+    std::vector<hsql::Expr*> aggregates;
+    std::vector<hsql::Expr*> groupby;
+    hsql::Expr* having = nullptr;
+    ExecutionUtility::getAggregationExpr(statement->selectList, aggregates);
+    if(statement->groupBy != nullptr){
+        ExecutionUtility::getAggregationExpr(statement->groupBy->columns, aggregates);
+    }
+    if(statement->order != nullptr){
+        for(auto orderDesc : *statement->order){
+            ExecutionUtility::getAggregationExpr(orderDesc->expr, aggregates);
+        }
+    }
+    if(statement->groupBy != nullptr){
+        for(auto expr : *statement->groupBy->columns){
+            groupby.push_back(expr);
+        }
+        having = statement->groupBy->having;
+    }
+    if(having != nullptr){
+        ExecutionUtility::getAggregationExpr(having, aggregates);
+    }
+    auto aggrIterator = whereIterator;
+    if(aggregates.size() != 0){
+        aggrIterator = new AggregationIterator(aggregates, groupby, having, whereIterator, &colAliasMap);
+    }
+    return aggrIterator;
     //TODO
 }
 

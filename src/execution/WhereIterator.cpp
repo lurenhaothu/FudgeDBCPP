@@ -1,5 +1,6 @@
 #include "WhereIterator.h"
 #include "ExecutionUtility.h"
+#include "general/Tuple.h"
 
 using namespace fudgeDB;
 
@@ -15,7 +16,7 @@ WhereIterator::~WhereIterator(){
 Tuple* WhereIterator::fetchNext(){
     while(tupleIterator->hasNext()){
         auto tuple = tupleIterator->next();
-        if(ExecutionUtility::filter(tuple, this->whereClause)){
+        if(ExecutionUtility::filter(tuple, this->whereClause, nullptr)){
             return tuple;
         }else{
             delete tuple;

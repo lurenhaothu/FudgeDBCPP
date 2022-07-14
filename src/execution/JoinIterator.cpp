@@ -36,7 +36,7 @@ JoinIterator::~JoinIterator(){
 }
 Tuple* JoinIterator::fetchNext(){
     Tuple* tuple = fetchWithoutFilter();
-    while(tuple != nullptr && !ExecutionUtility::filter(tuple, this->condition)){
+    while(tuple != nullptr && !ExecutionUtility::filter(tuple, this->condition, nullptr)){
         delete tuple;
         tuple = fetchWithoutFilter();
     }
