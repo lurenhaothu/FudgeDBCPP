@@ -106,7 +106,8 @@ AggregationIterator::AggregationIterator(std::vector<hsql::Expr*> aggregates,
         auto gbColNames = ExecutionUtility::getColName(expr, childTupleDesc, aliasMap);
         groupbyExpr.push_back(expr);
         colNames.push_back(gbColNames[2]);
-        types.push_back(new IntType());
+        auto gbtype = ExecutionUtility::getColType(expr, childTupleDesc, aliasMap);
+        types.push_back(gbtype);
         tableNames.push_back(gbColNames[0]);
         alias.push_back(gbColNames[1]);
     }

@@ -12,6 +12,7 @@ namespace hsql{
 namespace fudgeDB{
     class Tuple;
     class TupleDesc;
+    class Type;
     class ExecutionUtility{
         public:
             static bool filter(Tuple* tuple, hsql::Expr* expr, std::unordered_map<std::string, hsql::Expr*>* aliasMap);
@@ -27,8 +28,9 @@ namespace fudgeDB{
                 std::vector<hsql::Expr*>& aggrList);
             static void getAggregationExpr(hsql::Expr* expr, 
                 std::vector<hsql::Expr*>& aggrList);
-            static std::unordered_map<std::string, hsql::Expr*> getColAliasMap
+            static std::unordered_map<std::string, hsql::Expr*>* getColAliasMap
                 (std::vector<hsql::Expr*>* selectList);
+            static Type* getColType(hsql::Expr* expr, TupleDesc* tupleDesc, std::unordered_map<std::string, hsql::Expr*>* aliasMap); 
     };
 }
 

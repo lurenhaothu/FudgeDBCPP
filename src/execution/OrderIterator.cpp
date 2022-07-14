@@ -6,7 +6,8 @@
 
 using namespace fudgeDB;
 
-OrderIterator::OrderIterator(std::vector<hsql::OrderDescription*>* orders, TupleIterator* tupleIterator, std::unordered_map<std::string, hsql::Expr*>* aliasMap){
+OrderIterator::OrderIterator(std::vector<hsql::OrderDescription*>* orders,
+    TupleIterator* tupleIterator, std::unordered_map<std::string, hsql::Expr*>* aliasMap){
     this->orders = orders;
     this->tupleIterator = tupleIterator;
     this->index = -1;
@@ -41,7 +42,9 @@ TupleDesc* OrderIterator::getTupleDesc(){
 void OrderIterator::fetchAll(){
     tupleIterator->open();
     while(tupleIterator->hasNext()){
-        tuples.push_back(new Tuple(tupleIterator->next(), tupleIterator->getTupleDesc()));
+        auto tuple = tupleIterator->next();
+        tuples.push_back(new Tuple(tuple, tupleIterator->getTupleDesc()));
+        delete tuple;
     }
 }
 void OrderIterator::sort(){

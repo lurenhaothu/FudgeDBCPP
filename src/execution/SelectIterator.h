@@ -1,31 +1,31 @@
-#ifndef FUDGEDB_SRC_EXECUTION_ORDERITERATOR_H
-#define FUDGEDB_SRC_EXECUTION_ORDERITERATOR_H
+#ifndef FUDGEDB_SRC_EXECUTION_SELECTITERATOR_H
+#define FUDGEDB_SRC_EXECUTION_SELECTITERATOR_H
 
 #include "general/TupleIterator.h"
 #include "SQLParser.h"
 #include "unordered_map"
+#include "vector"
 
 namespace fudgeDB{
-    class OrderIterator : public TupleIterator{
+    class TupleDesc;
+    class SelectIterator : public TupleIterator{
         private:
             TupleIterator* tupleIterator;
-            std::vector<Tuple*> tuples;
-            std::vector<hsql::OrderDescription*>* orders;
+            std::vector<hsql::Expr*>* selectList;
             std::unordered_map<std::string, hsql::Expr*>* aliasMap;
-            int index;
+            TupleDesc* tupleDesc;
+            TupleDesc* childTupleDesc;
         public:
-            OrderIterator(std::vector<hsql::OrderDescription*>* orders,
-                TupleIterator* tupleIterator, 
+            SelectIterator(std::vector<hsql::Expr*>* selectList, TupleIterator* tupleIterator, 
                 std::unordered_map<std::string, hsql::Expr*>* aliasMap);
-            ~OrderIterator();
+            ~SelectIterator();
             Tuple* fetchNext();
             void open();
             void close();
             void rewind();
             TupleDesc* getTupleDesc();
         private:
-            void fetchAll();
-            void sort();
+            Tuple* getTuple(Tuple* tuple);
     };
 }
 

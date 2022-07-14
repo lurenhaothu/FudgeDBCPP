@@ -4,6 +4,7 @@
 #include "general/Tuple.h"
 #include "general/TupleDesc.h"
 #include "iostream"
+#include "general/Type.h"
 
 using namespace fudgeDB;
 
@@ -183,12 +184,12 @@ void ExecutionUtility::getAggregationExpr(hsql::Expr* expr,
         ExecutionUtility::getAggregationExpr(expr->expr2, aggrList);
     }
 }
-std::unordered_map<std::string, hsql::Expr*> ExecutionUtility::getColAliasMap(std::vector<hsql::Expr*>* selectList){
-    std::unordered_map<std::string, hsql::Expr*> aliasMap;
+std::unordered_map<std::string, hsql::Expr*>* ExecutionUtility::getColAliasMap(std::vector<hsql::Expr*>* selectList){
+    auto aliasMap = new std::unordered_map<std::string, hsql::Expr*>();
     for(auto expr : *selectList){
         if(expr->alias != nullptr){
             std::string key = expr->alias;
-            aliasMap[key] = expr;
+            aliasMap->at(key) = expr;
         }
     }
     return aliasMap;
@@ -200,4 +201,35 @@ Field* ExecutionUtility::getFieldByAggregate(Tuple* tuple, hsql::Expr* expr, std
     if(index == -1) index = tuple->getTupleDesc()->getIndex(colNames[1], colNames[2]);
     if(index == -1) throw fudgeError("Cannot find column");
     return Field::copy(tuple->getField(index));
+}
+
+Type* ExecutionUtility::getColType(hsql::Expr* expr, TupleDesc* tupleDesc, 
+    std::unordered_map<std::string, hsql::Expr*>* aliasMap){
+    if(expr == nullptr) return nullptr;
+    else if(expr->type == hsql::ExprType::kExprColumnRef){
+        if(aliasMap->find(expr->name) != aliasMap->end()){
+            return ExecutionUtility::getColType(aliasMap->at(expr->name), tupleDesc, aliasMap);
+        }else{
+            std::string tableName = expr->table == nullptr ? "" : expr->table;
+            std::string colName = expr->name == nullptr ? "" : expr->name;
+            int index = tupleDesc->getIndex(tableName, colName);
+            if(index == -1) throw fudgeError("column not found");
+            return Type::copy(tupleDesc->getType(index));
+        }
+    }else if(expr->type == hsql::ExprType::kExprFunctionRef){
+        return new IntType();
+    }else if(expr->type == hsql::ExprType::kExprOperator){
+        Type* type;
+        auto child1 = ExecutionUtility::getColType(expr->expr, tupleDesc, aliasMap);
+        auto child2 = ExecutionUtility::getColType(expr->expr2, tupleDesc, aliasMap);
+        if(child1 == nullptr) type = child2;
+        else type = child1;
+        return type;
+    }else if(expr->type == hsql::ExprType::kExprLiteralInt){
+        return new IntType();
+    }else if(expr->type == hsql::ExprType::kExprLiteralString){
+        return new StringType(0);
+    }else{
+        throw fudgeError("expr type not supported");
+    }
 }

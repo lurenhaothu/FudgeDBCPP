@@ -16,6 +16,8 @@
 #include "execution/AggregationIterator.h"
 #include "execution/ExecutionUtility.h"
 #include "execution/OrderIterator.h"
+#include "execution/LimitIterator.h"
+#include "execution/SelectIterator.h"
 
 using namespace fudgeDB;
 
@@ -172,14 +174,18 @@ TupleIterator* Executor::executeSelectToIterator(const hsql::SelectStatement* st
     }
     auto aggrIterator = whereIterator;
     if(aggregates.size() != 0){
-        aggrIterator = new AggregationIterator(aggregates, groupby, having, whereIterator, &colAliasMap);
+        aggrIterator = new AggregationIterator(aggregates, groupby, having, whereIterator, colAliasMap);
     }
     auto orderIterator = aggrIterator;
     if(statement->order != nullptr){
-        orderIterator = new OrderIterator(statement->order, aggrIterator, &colAliasMap);
+        orderIterator = new OrderIterator(statement->order, aggrIterator, colAliasMap);
     }
-    return orderIterator;
-    //TODO
+    auto limitIterator = orderIterator;
+    if(statement->limit != nullptr){
+        limitIterator = new LimitIterator(statement->limit, orderIterator);
+    }
+    auto selectIterator = new SelectIterator(statement->selectList, limitIterator, colAliasMap);
+    return selectIterator;
 }
 
 TupleIterator* Executor::executeFromTableRef(const hsql::TableRef* tableRef){
