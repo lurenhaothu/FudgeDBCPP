@@ -81,3 +81,22 @@ void FudgeDB::run(){
         free(line);
     }
 }
+
+void FudgeDB::run(std::fstream& cmdFile, std::fstream& output){
+    std::string query;
+    while(std::getline(cmdFile, query)){
+        hsql::SQLParserResult result;
+        hsql::SQLParser::parse(query, &result);
+        if (result.isValid()) {
+            for (auto i = 0; i < result.size(); ++i) {
+                try{
+                    output<<executor->executeStatement(result.getStatement(i))<<std::endl;
+                }catch(fudgeError err){
+                    output<<"execution error: "<<err.what()<<std::endl;
+                }
+            }
+        }else{
+            output<<"SQL Parse error"<<std::endl;
+        }
+    }
+}

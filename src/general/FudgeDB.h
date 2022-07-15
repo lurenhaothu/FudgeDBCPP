@@ -2,6 +2,7 @@
 #define FUDGEDB_SRC_GENERAL_FUDGEDB_H
 
 #include <string>
+#include <fstream>
 
 namespace fudgeDB{
     class TableCatalog;
@@ -27,6 +28,7 @@ namespace fudgeDB{
             void open();
             void close();
             void run();
+            void run(std::fstream& cmdFile, std::fstream& output);
     };
 }
 
