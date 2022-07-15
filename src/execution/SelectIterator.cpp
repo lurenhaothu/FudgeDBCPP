@@ -2,13 +2,18 @@
 #include "general/TupleDesc.h"
 #include "ExecutionUtility.h"
 #include "general/Tuple.h"
+#include "iostream"
 
 using namespace fudgeDB;
 
 
 SelectIterator::SelectIterator(std::vector<hsql::Expr*>* selectList, TupleIterator* tupleIterator, 
     std::unordered_map<std::string, hsql::Expr*>* aliasMap){
-    this->selectList = selectList;
+    this->selectList = new std::vector<hsql::Expr*>();
+    for(auto expr : *selectList){
+        if(expr->type != hsql::ExprType::kExprStar) this->selectList->push_back(expr);
+        else ExecutionUtility::replaceStar(expr, tupleIterator->getTupleDesc(), this->selectList);
+    }
     this->tupleIterator = tupleIterator;
     this->aliasMap = aliasMap;
     std::vector<std::string> tableNames;
@@ -16,7 +21,7 @@ SelectIterator::SelectIterator(std::vector<hsql::Expr*>* selectList, TupleIterat
     std::vector<std::string> colNames;
     std::vector<Type*> types;
     this->childTupleDesc = tupleIterator->getTupleDesc();
-    for(auto expr : *selectList){
+    for(auto expr : *this->selectList){
         auto names = ExecutionUtility::getColName(expr, childTupleDesc, aliasMap);
         tableNames.push_back(names[0]);
         tableAlias.push_back(names[1]);
@@ -25,10 +30,12 @@ SelectIterator::SelectIterator(std::vector<hsql::Expr*>* selectList, TupleIterat
         types.push_back(type);
     }
     this->tupleDesc = new TupleDesc(colNames, types, tableNames, tableAlias);
+    //std::cout<<tupleDesc->toString()<<std::endl;
 }
 SelectIterator::~SelectIterator(){
     delete tupleIterator;
     delete tupleDesc;
+    delete selectList;
 }
 Tuple* SelectIterator::fetchNext(){
     if(tupleIterator->hasNext()){

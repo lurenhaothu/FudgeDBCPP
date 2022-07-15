@@ -30,7 +30,8 @@ namespace fudgeDB{
                 std::vector<hsql::Expr*>& aggrList);
             static std::unordered_map<std::string, hsql::Expr*>* getColAliasMap
                 (std::vector<hsql::Expr*>* selectList);
-            static Type* getColType(hsql::Expr* expr, TupleDesc* tupleDesc, std::unordered_map<std::string, hsql::Expr*>* aliasMap); 
+            static Type* getColType(hsql::Expr* expr, TupleDesc* tupleDesc, std::unordered_map<std::string, hsql::Expr*>* aliasMap);
+            static void replaceStar(hsql::Expr* expr, TupleDesc* tupleDesc, std::vector<hsql::Expr*>*finalSelectList);  
     };
 }
 

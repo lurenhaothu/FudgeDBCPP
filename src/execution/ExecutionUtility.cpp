@@ -47,6 +47,10 @@ bool ExecutionUtility::binaryFilter(Tuple* tuple, hsql::Expr* expr, Op op, std::
 }
 
 Field* ExecutionUtility::getField(Tuple* tuple, hsql::Expr* expr, std::unordered_map<std::string, hsql::Expr*>* aliasMap){
+    if(tuple == nullptr && ((expr->type != hsql::ExprType::kExprLiteralInt) &&
+        (expr->type != hsql::ExprType::kExprLiteralString))){
+        throw fudgeError("unsupported type");
+    }
     switch(expr->type){
         case hsql::ExprType::kExprOperator:
             return getFieldByCalculation(tuple, expr, aliasMap);
@@ -232,4 +236,28 @@ Type* ExecutionUtility::getColType(hsql::Expr* expr, TupleDesc* tupleDesc,
     }else{
         throw fudgeError("expr type not supported");
     }
+}
+
+char* getStringCopy(std::string str){
+    auto chr = new char[str.size() + 1];
+    str.copy(chr, str.size());
+    chr[str.size()] = '\0';
+    return chr;
+}
+
+
+void ExecutionUtility::replaceStar(hsql::Expr* expr, TupleDesc* tupleDesc, std::vector<hsql::Expr*>*finalSelectList){
+    if(expr->table == nullptr){
+        for(int i = 0; i < tupleDesc->getLength(); i++){
+            finalSelectList->push_back(hsql::Expr::makeColumnRef(getStringCopy(tupleDesc->getTableName(i)), getStringCopy(tupleDesc->getName(i))));
+        }
+    }else{
+        std::string tableName = expr->table;
+        for(int i = 0; i < tupleDesc->getLength(); i++){
+            if(tableName == tupleDesc->getTableName(i) || tableName == tupleDesc->getAlias(i)){
+                finalSelectList->push_back(hsql::Expr::makeColumnRef(getStringCopy(tupleDesc->getTableName(i)), getStringCopy(tupleDesc->getName(i))));
+            }
+        }
+    }
+    return;
 }

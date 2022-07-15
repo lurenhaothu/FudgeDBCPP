@@ -94,29 +94,25 @@ std::string Executor::insertValueHelper(const hsql::InsertStatement* statement){
     if(tupleDesc->getLength() != statement->values->size()){
         return "Cannot fit table columns, column number error";
     }
-    for(int i = 0; i < tupleDesc->getLength(); i++){
-        auto val = statement->values->at(i);
-        switch(val->type){
-            case hsql::ExprType::kExprLiteralInt:
-                if(tupleDesc->getType(i)->getType() != TypeEnum::IntTypeEnum) return "Cannot fit table columns, type error";
-                break;
-            case hsql::ExprType::kExprLiteralString:
-                if(tupleDesc->getType(i)->getType() != TypeEnum::StringTypeEnum) return "Cannot fit table columns, type error";
-                break;
-            default:
-                return "Unsupported data type";
+    std::vector<Field*> fields(tupleDesc->getLength(), nullptr);
+    for(int i = 0; i < statement->values->size(); i++){
+        auto field = ExecutionUtility::getField(nullptr, statement->values->at(i), nullptr);
+        int index = i;
+        if(statement->columns != nullptr && i < statement->columns->size()){
+            std::string colName = statement->columns->at(i);
+            index = tupleDesc->getIndex("", colName);
+            if(index == -1){
+                throw fudgeError("insert error, cannot find the column");
+            }
         }
+        if(tupleDesc->getType(index)->getType() != field->getType()){
+            throw fudgeError("column type error");
+        }
+        fields[index] = field;
     }
-    std::vector<Field*> fields;
-    for(int i = 0; i < tupleDesc->getLength(); i++){
-        auto val = statement->values->at(i);
-        switch(val->type){
-            case hsql::ExprType::kExprLiteralInt:
-                fields.push_back(new IntField(val->ival));
-                break;
-            case hsql::ExprType::kExprLiteralString:
-                fields.push_back(new StringField(val->name));
-                break;
+    for(auto field : fields){
+        if(field == nullptr){
+            throw fudgeError("null column not supported");
         }
     }
     auto tuple = new Tuple(tupleDesc, fields);
